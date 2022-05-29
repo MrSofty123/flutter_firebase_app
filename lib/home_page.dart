@@ -31,7 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final phoneController = TextEditingController();
 
   void _addUserDB() {
-      print('hi');
+      if (nameController.text.isEmpty || addressController.text.isEmpty || phoneController.text.isEmpty)
+        return
       print('adding to db: name=${nameController.text} address=${addressController
           .text} phone=${phoneController.text}');
       db.collection("users").add({
