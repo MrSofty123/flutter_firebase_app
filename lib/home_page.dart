@@ -142,6 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             Center(child: Text(snapshot.data?.docs[index]['name'])),
                             Center(child: Text(snapshot.data?.docs[index]['address'])),
                             Center(child: Text(snapshot.data?.docs[index]['phone'].toString() as String)),
+                            Center(child: Text(
+                                db.collection("products").doc(snapshot.data?.docs[index]['bought']).get().then((value) => null)
+                                .toString() as String)
+                            ),
                             Center(child: IconButton(
                               icon: const Icon(Icons.delete),
                               tooltip: 'Remove User',
@@ -217,7 +221,15 @@ class user {
   String id = "undefined";
   String name = "undefined";
   String address = "undefined";
+  product? bought = product(weight: 'undefined', price: 0);
   num phone = 0;
 
-  user({required this.id, required this.name, required this.address, required this.phone});
+  user({required this.id, required this.name, required this.address, required this.phone, this.bought});
+}
+
+class product {
+  String weight = "undefined";
+  num price = 0;
+  
+  product({required this.weight, required this.price});
 }
