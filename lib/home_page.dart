@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   void initState() {
-    db.collection("users").snapshots().listen((event) {
+    /*db.collection("users").snapshots().listen((event) {
       print('listener called');
       event.docChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         users: this.users;
       });
-    });
+    });*/
   }
 
   // Listen to database updates
@@ -121,10 +121,44 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: ListView(
-          padding: const EdgeInsets.all(8),
-          children: _computeUsersList(),
-        )
+        child: StreamBuilder<QuerySnapshot>(
+            stream: db.collection("users").snapshots(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.active || snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return const Text('Error');
+                } else if (snapshot.hasData) {
+                  return ListView.builder(
+                      itemCount: snapshot.data?.docs.length,
+                      itemBuilder: (context,index){
+                      return Container(
+                        height: 50,
+                        color: Colors.amber[600],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Center(child: Text(snapshot.data?.docs[index]['name'])),
+                            Center(child: Text(snapshot.data?.docs[index]['address'])),
+                            Center(child: Text(snapshot.data?.docs[index]['phone'].toString() as String)),
+                            Center(child: IconButton(
+                              icon: const Icon(Icons.delete),
+                              tooltip: 'Remove User',
+                              onPressed: () => db.collection("users").doc(snapshot.data?.docs[index].id).delete().onError((error, stackTrace) => print(error)),
+                            ),)
+                          ],
+                        ),
+                      );
+                  });
+                } else {
+                  return const Text('Empty data');
+                }
+              } else {
+                return Text('State: ${snapshot.connectionState}');
+              }
+            },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog<String>(
